@@ -2,6 +2,23 @@
 
 BEHOLD.... THE SOUNDINATOR
 
+A basic implementation of a BLE speaker to gain a deeper understanding of BLE concepts
+
+![image](https://github.com/user-attachments/assets/b3a942c7-d6fa-4635-9fce-437d58e84522)
+
+## Materials
+- ESP32 WROOM (comes with BLE and Wifi capabilities)
+- MAX98357A amplifier
+- 4/8 Ohm speaker that meets power requirements of the amplifier
+- Breadboard
+- Wires
+
+## Implementation Steps
+1. Base BLE server as a FreeRTOS task implemented on the ESP32. Able to read and write from an existing BLE scanner app
+2. ESP32 Interface with the amplifier. Structure communication between the BLE task and the audio interface task. Play a note based on user input from the BLE scanner * **we are here** *
+3. Send chunks of raw audio (.wav) from the phone and play from the ESP32 speaker
+4. Implement a custom BLE client app on the phone to send any audio recording to the ESP32
+
 <!-- | Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-C6 | ESP32-H2 | ESP32-P4 | ESP32-S2 | ESP32-S3 | Linux |
 | ----------------- | ----- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | ----- |
 
