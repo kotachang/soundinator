@@ -20,11 +20,16 @@
 
 char *tag = "BLE-Server";
 uint8_t ble_addr_type;
+uint16_t conn_handle;
+uint16_t sub_conn_handle;
+
 void ble_app_advertise(void);
 
 // Write data to ESP32 defined as server
 static int device_write(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
+    ESP_LOGI("", "device write. conn:%d attr:%d", conn_handle, attr_handle);
+    ESP_LOGI("", "device write. subscribe handle:%d", sub_conn_handle);
     printf("Data from the client: %.*s\n", ctxt->om->om_len, ctxt->om->om_data);
     return 0;
 }
@@ -42,16 +47,17 @@ static const struct ble_gatt_svc_def gatt_svcs[] = {
     {.type = BLE_GATT_SVC_TYPE_PRIMARY,
      .uuid = BLE_UUID16_DECLARE(0xBEEF),                 // Define UUID for device type
      .characteristics = (struct ble_gatt_chr_def[]){
-         {.uuid = BLE_UUID16_DECLARE(0xBEBE),           // Define UUID for reading
+         {.uuid = BLE_UUID16_DECLARE(0xBEBE),           // Define UUID for readingP
           .flags = BLE_GATT_CHR_F_READ,
           .access_cb = device_read},
          {.uuid = BLE_UUID16_DECLARE(0xFACE),           // Define UUID for writing
-          .flags = BLE_GATT_CHR_F_WRITE,
-          .access_cb = device_write},
+          .flags = BLE_GATT_CHR_F_WRITE | BLE_GATT_CHR_F_NOTIFY,
+          .access_cb = device_write,
+          .val_handle = &sub_conn_handle},
          {0}}},
     {0}};
 
-// BLE GAP event (connection) handling
+/* BLE GAP event (connection) handling */
 static int ble_gap_event(struct ble_gap_event *event, void *arg)
 {
     switch (event->type)
@@ -63,6 +69,7 @@ static int ble_gap_event(struct ble_gap_event *event, void *arg)
         {
             ble_app_advertise();
         }
+        conn_handle = event->connect.conn_handle;
         break;
     /* Advertisement duration over. Start advertising again */
     case BLE_GAP_EVENT_ADV_COMPLETE:
@@ -73,13 +80,22 @@ static int ble_gap_event(struct ble_gap_event *event, void *arg)
         ESP_LOGI("GAP", "BLE GAP EVENT DISCONNECT. Reason: %d", event->disconnect.reason);
         ble_app_advertise();
         break;
+    case BLE_GAP_EVENT_SUBSCRIBE:
+        ESP_LOGI("GAP", "BLE GAP EVENT SUBSCRIBE. conn: %d, attr: %d, reason:%d", event->subscribe.conn_handle, event->subscribe.attr_handle, event->subscribe.reason);
+        if (event->subscribe.attr_handle == sub_conn_handle) {
+            ESP_LOGI("GAP", "SUBSCRIBED TO DEVICE WRITE");
+            uint8_t test_arr[3] = {1,2,3};
+            struct os_mbuf *om = ble_hs_mbuf_from_flat(test_arr, sizeof(test_arr));
+            ble_gatts_notify_custom(conn_handle, sub_conn_handle, om);
+        }
+        break;
     default:
         break;
     }
     return 0;
 }
 
-// Define the BLE connection and start advertising
+/* Define the BLE connection and start advertising */
 void ble_app_advertise(void)
 {
     // GAP - set fields for device name
@@ -100,14 +116,14 @@ void ble_app_advertise(void)
     ble_gap_adv_start(ble_addr_type, NULL, BLE_HS_FOREVER, &adv_params, ble_gap_event, NULL);
 }
 
-// Start of BLE application
+/* Start of BLE application after NimBLE host & controller are synced */
 void ble_app_on_sync(void)
 {
     ble_hs_id_infer_auto(0, &ble_addr_type); // Determines the best address type automatically
     ble_app_advertise();                     // Define the BLE connection
 }
 
-// The (almost) infinite FreeRTOS task
+/* The (almost) infinite FreeRTOS task */
 void host_task(void *param)
 {
     ESP_LOGI(tag, "BLE Host Task Started");
@@ -140,6 +156,7 @@ void app_main()
     /* Initialize the NimBLE host configuration. */
     ble_hs_cfg.sync_cb = ble_app_on_sync;   // Initialize advertisement only after the host & controller are synced
     ble_hs_cfg.reset_cb = ble_app_on_sync;  // If NimBLE stack resets after crash, start advertisement process again
+    
     /* TODO: if implemeting persistent connection then add
     * ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
     * and look into 'store' 
