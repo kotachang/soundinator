@@ -19,6 +19,21 @@ A basic implementation of a BLE speaker to gain a deeper understanding of BLE co
 3. Send chunks of raw audio (.wav) from the phone and play from the ESP32 speaker
 4. Implement a custom BLE client app on the phone to send any audio recording to the ESP32
 
+## Build and Flash Instructions for ESP32
+Following are the instructions for when you FIRST build the project. After building once, only steps 8-10 are required. Note that the very first build process can take a while. 
+
+1. VSdCode Command Pallete (`Ctrl+Shift+P` on Windows) -> `ESP-IDF: Open Project Configuration`. Create a new profile with name of your choice.
+2. Under 'Build Directory path', put [directory-to-the-repo]\soundinator\ESP32\build
+3. Under 'sdkconfig file path', put [directory-to-the-repo]\soundinator\ESP32\
+4. Under 'OpenOCD' 'Debug Level', put INFO
+5. Command Pallete -> `ESP-IDF: Select project configuration`. Select the configuration you just made.
+6. Command Pallete -> `ESP-IDF: Open ESP-IDF Terminal`. This should open a terminal on the bottom of VS Code. Go to [directory-to-the-repo]\soundinator\ESP32\ directory in the terminal.
+7. Run `idf.py save-defconfig`
+8. Run `idf.py build`
+9. Run `idf.py flash` (It should automatically detect the ESP32, but you can also specify the port with -p)
+10. Command Pallete -> `ESP-IDF: Monitor Device` to read logs from ESP32
+
+
 <!-- | Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-C6 | ESP32-H2 | ESP32-P4 | ESP32-S2 | ESP32-S3 | Linux |
 | ----------------- | ----- | -------- | -------- | -------- | -------- | -------- | -------- | -------- | ----- |
 
