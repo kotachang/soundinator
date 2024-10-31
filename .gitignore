@@ -1,2 +1,8 @@
-build/
 .vscode/
+build/
+sdkconfig
+sdkconfig.defaults
+ESP32/build/
+ESP32/sdkconfig
+ESP32/sdkconfig.defaults
+esp_idf_project_configuration.json
