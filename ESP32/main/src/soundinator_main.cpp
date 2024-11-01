@@ -15,6 +15,9 @@
 #include "sdkconfig.h"
 #include "nimbler.hpp"
 
+// tag for logs
+const char* tag = "Main";
+
 /*
 * Follow programming sequence from https://docs.espressif.com/projects/esp-idf/en/v5.3.1/esp32/api-reference/bluetooth/nimble/index.html
 * as well as the bleprph example by espressif
@@ -30,5 +33,6 @@ extern "C" void app_main()
     ESP_ERROR_CHECK(ret);
 
     Nimbler nimbler("Soundinator");
-    ESP_LOGI("main", "main task called nimbler");
+    nimbler.init();
+    ESP_LOGI(tag, "main task called nimbler");
 }
