@@ -11,6 +11,7 @@ Private Member Initialization
 uint8_t Nimbler::ble_addr_type = 0;
 uint16_t Nimbler::conn_hndl = 0;
 uint16_t Nimbler::attr_hndl_audio = 0;
+uint8_t Nimbler::notify_chr_audio = 0;
 
 /* uuids for main ble service and characteristics */
 const ble_uuid16_t Nimbler::service_uuid = {
@@ -21,9 +22,9 @@ const ble_uuid16_t Nimbler::device_read_uuid = {
     .u = BLE_UUID_TYPE_16,
     .value = device_read_uuid_val
 };
-const ble_uuid16_t Nimbler::device_write_uuid = {
+const ble_uuid16_t Nimbler::receive_audio_uuid = {
     .u = BLE_UUID_TYPE_16,
-    .value = device_write_val
+    .value = receive_audio_val
 };
 
 /* gatt characteristic structure definition */
@@ -34,8 +35,8 @@ const struct ble_gatt_chr_def Nimbler::gatt_chars[N_CHARACTERISTICS] = {
         .flags = BLE_GATT_CHR_F_READ
     },
     {
-        .uuid = (ble_uuid_t *)&device_write_uuid,
-        .access_cb = _device_write,
+        .uuid = (ble_uuid_t *)&receive_audio_uuid,
+        .access_cb = _receive_audio,
         .flags = BLE_GATT_CHR_F_WRITE | BLE_GATT_CHR_F_NOTIFY,
         .val_handle = &attr_hndl_audio
     },
@@ -174,10 +175,13 @@ int Nimbler::_ble_gap_event(struct ble_gap_event *event, void *arg)
     case BLE_GAP_EVENT_SUBSCRIBE:
         ESP_LOGI(tag, "BLE GAP EVENT SUBSCRIBE. conn: %d, attr: %d, reason:%d", event->subscribe.conn_handle, event->subscribe.attr_handle, event->subscribe.reason);
         if (event->subscribe.attr_handle == attr_hndl_audio) {
-            ESP_LOGI(tag, "SUBSCRIBED TO DEVICE WRITE");
-            uint8_t test_arr[3] = {1,2,3};
-            struct os_mbuf *om = ble_hs_mbuf_from_flat(test_arr, sizeof(test_arr));
-            ble_gatts_notify_custom(conn_hndl, attr_hndl_audio, om);
+            if (event->subscribe.reason == BLE_GAP_SUBSCRIBE_REASON_WRITE) {
+                ESP_LOGI(tag, "SUBSCRIBED TO RECEIVE AUDIO");
+                notify_chr_audio = 1;
+            } else if (event->subscribe.reason == BLE_GAP_SUBSCRIBE_REASON_TERM) {
+                ESP_LOGI(tag, "UNSUBSCRIBED TO RECEIVE AUDIO");
+                notify_chr_audio = 0;
+            }
         }
         break;
     default:
@@ -186,11 +190,10 @@ int Nimbler::_ble_gap_event(struct ble_gap_event *event, void *arg)
     return 0;
 }
 
-/* Write data to ESP32 defined as server */
-int Nimbler::_device_write(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
+/* Receive audio from client */
+int Nimbler::_receive_audio(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
-    ESP_LOGI("", "device write. conn:%d attr:%d", conn_handle, attr_handle);
-    //ESP_LOGI("", "device write. subscribe handle:%d", this->attr_hndl_audio);
+    ESP_LOGI(tag, "Receive audio callback. conn:%d attr:%d", conn_handle, attr_handle);
     printf("Data from the client: %.*s\n", ctxt->om->om_len, ctxt->om->om_data);
     return 0;
 }
