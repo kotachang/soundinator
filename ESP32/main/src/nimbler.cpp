@@ -18,9 +18,9 @@ const ble_uuid16_t Nimbler::service_uuid = {
     .u = BLE_UUID_TYPE_16,
     .value = service_uuid_val
 };
-const ble_uuid16_t Nimbler::device_read_uuid = {
+const ble_uuid16_t Nimbler::audio_info_uuid = {
     .u = BLE_UUID_TYPE_16,
-    .value = device_read_uuid_val
+    .value = audio_info_uuid_val
 };
 const ble_uuid16_t Nimbler::receive_audio_uuid = {
     .u = BLE_UUID_TYPE_16,
@@ -30,8 +30,8 @@ const ble_uuid16_t Nimbler::receive_audio_uuid = {
 /* gatt characteristic structure definition */
 const struct ble_gatt_chr_def Nimbler::gatt_chars[N_CHARACTERISTICS] = {
     {
-        .uuid = (ble_uuid_t *)&device_read_uuid,
-        .access_cb = _device_read,
+        .uuid = (ble_uuid_t *)&audio_info_uuid,
+        .access_cb = _audio_info,
         .flags = BLE_GATT_CHR_F_READ
     },
     {
@@ -198,9 +198,12 @@ int Nimbler::_receive_audio(uint16_t conn_handle, uint16_t attr_handle, struct b
     return 0;
 }
 
-/* Read data from ESP32 defined as server */
-int Nimbler::_device_read(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
-{
-    os_mbuf_append(ctxt->om, "Data from the server", strlen("Data from the server"));
+/* Receive incoming audio info from client */
+int Nimbler::_audio_info(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
+{   
+    uint8_t data[1];
+    data[0] = 1;
+    struct os_mbuf *om = ble_hs_mbuf_from_flat(data, sizeof(data));
+    ble_gatts_notify_custom(con_handle, attr_handle, om);
     return 0;
 }
