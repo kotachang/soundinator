@@ -20,7 +20,13 @@ extern "C" void app_main()
     }
     ESP_ERROR_CHECK(ret);
 
+<<<<<<< HEAD
     /* Start the BLE task with Nimbler */
+=======
+    /* Create a nimbler object and call init() which configures BLE and starts the BLE task
+    * Note: FreeRTOS in ESP-IDF should NOT call vTaskStartScheduler() and vTaskEndScheduler()
+    */
+>>>>>>> bf6df63 (Added differentiation between subscribing and unsubscribing)
     Nimbler nimbler("Soundinator");
     nimbler.init();
     ESP_LOGI(tag, "Nimbler initialized");
