@@ -2,9 +2,64 @@
 #include <string>
 #include "nimbler.hpp"
 
-/* Initialize private static members */
+/*
+-------------------------------------------------------------------------------------
+Private Member Initialization
+-------------------------------------------------------------------------------------
+*/
+
 uint8_t Nimbler::ble_addr_type = 0;
+uint16_t Nimbler::conn_hndl = 0;
 uint16_t Nimbler::attr_hndl_audio = 0;
+
+/* uuids for main ble service and characteristics */
+const ble_uuid16_t Nimbler::service_uuid = {
+    .u = BLE_UUID_TYPE_16,
+    .value = service_uuid_val
+};
+const ble_uuid16_t Nimbler::device_read_uuid = {
+    .u = BLE_UUID_TYPE_16,
+    .value = device_read_uuid_val
+};
+const ble_uuid16_t Nimbler::device_write_uuid = {
+    .u = BLE_UUID_TYPE_16,
+    .value = device_write_val
+};
+
+/* gatt characteristic structure definition */
+const struct ble_gatt_chr_def Nimbler::gatt_chars[N_CHARACTERISTICS] = {
+    {
+        .uuid = (ble_uuid_t *)&device_read_uuid,
+        .access_cb = _device_read,
+        .flags = BLE_GATT_CHR_F_READ
+    },
+    {
+        .uuid = (ble_uuid_t *)&device_write_uuid,
+        .access_cb = _device_write,
+        .flags = BLE_GATT_CHR_F_WRITE | BLE_GATT_CHR_F_NOTIFY,
+        .val_handle = &attr_hndl_audio
+    },
+    {
+        0, // No more characteristics
+    },
+};
+
+/* gatt service structure definition */
+const struct ble_gatt_svc_def Nimbler::gatt_svcs[N_SERVICES] = {
+    {   .type = BLE_GATT_SVC_TYPE_PRIMARY,
+        .uuid = (ble_uuid_t *)&service_uuid,                 // Define UUID for device type
+        .characteristics = gatt_chars,
+    },
+    {
+        0, // No more services
+    },
+};
+
+/*
+-------------------------------------------------------------------------------------
+Public Functions
+-------------------------------------------------------------------------------------
+*/
 
 /* Constructor */
 Nimbler::Nimbler(const char* device_name) {
@@ -32,9 +87,9 @@ void Nimbler::init() {
     /* Initialize GAP, GATT services */
     ble_svc_gap_init();     // General Access Profile
     ble_svc_gatt_init();    // General Attribute Profile
-    ret = ble_gatts_count_cfg(this->gatt_svcs);
+    ret = ble_gatts_count_cfg(gatt_svcs);
     assert(ret == 0);
-    ret = ble_gatts_add_svcs(this->gatt_svcs);
+    ret = ble_gatts_add_svcs(gatt_svcs);
     assert(ret == 0);
 
     /* Name BLE Device */
@@ -90,10 +145,48 @@ void Nimbler::_ble_app_advertise(void)
     memset(&adv_params, 0, sizeof(adv_params));
     adv_params.conn_mode = BLE_GAP_CONN_MODE_UND; // undirected & connectable
     adv_params.disc_mode = BLE_GAP_DISC_MODE_GEN; // general & discoverable
-    //ble_gap_adv_start(ble_addr_type, NULL, BLE_HS_FOREVER, &adv_params, ble_gap_event, NULL);
+    ble_gap_adv_start(ble_addr_type, NULL, BLE_HS_FOREVER, &adv_params, _ble_gap_event, NULL);
 }
 
-// Write data to ESP32 defined as server
+/* BLE GAP event (connection) handling */
+int Nimbler::_ble_gap_event(struct ble_gap_event *event, void *arg)
+{
+    switch (event->type)
+    {
+    case BLE_GAP_EVENT_CONNECT:
+        ESP_LOGI("GAP", "BLE GAP EVENT CONNECT %s", event->connect.status == 0 ? "OK!" : "FAILED!");
+        /* If connect event status is not 0, then advertise again */
+        if (event->connect.status != 0)
+        {
+            _ble_app_advertise();
+        }
+        conn_hndl = event->connect.conn_handle;
+        break;
+    /* Advertisement duration over. Start advertising again */
+    case BLE_GAP_EVENT_ADV_COMPLETE:
+        ESP_LOGI(tag, "BLE GAP EVENT ADV COMPLETE");
+        _ble_app_advertise();
+        break;
+    case BLE_GAP_EVENT_DISCONNECT:
+        ESP_LOGI(tag, "BLE GAP EVENT DISCONNECT. Reason: %d", event->disconnect.reason);
+        _ble_app_advertise();
+        break;
+    case BLE_GAP_EVENT_SUBSCRIBE:
+        ESP_LOGI(tag, "BLE GAP EVENT SUBSCRIBE. conn: %d, attr: %d, reason:%d", event->subscribe.conn_handle, event->subscribe.attr_handle, event->subscribe.reason);
+        if (event->subscribe.attr_handle == attr_hndl_audio) {
+            ESP_LOGI(tag, "SUBSCRIBED TO DEVICE WRITE");
+            uint8_t test_arr[3] = {1,2,3};
+            struct os_mbuf *om = ble_hs_mbuf_from_flat(test_arr, sizeof(test_arr));
+            ble_gatts_notify_custom(conn_hndl, attr_hndl_audio, om);
+        }
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
+
+/* Write data to ESP32 defined as server */
 int Nimbler::_device_write(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
     ESP_LOGI("", "device write. conn:%d attr:%d", conn_handle, attr_handle);
@@ -102,7 +195,7 @@ int Nimbler::_device_write(uint16_t conn_handle, uint16_t attr_handle, struct bl
     return 0;
 }
 
-// Read data from ESP32 defined as server
+/* Read data from ESP32 defined as server */
 int Nimbler::_device_read(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
     os_mbuf_append(ctxt->om, "Data from the server", strlen("Data from the server"));
