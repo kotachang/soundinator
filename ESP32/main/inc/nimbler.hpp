@@ -22,24 +22,18 @@
 class Nimbler {
     public:
         const char* device_name;
+        static constexpr char* tag = "Nimbler"; // tag used for logs
 
         Nimbler(const char* device_name);
         ~Nimbler();
         
         void init();
 
-        /* Callbacks need to be public for NimBLE */
-        static int device_write(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
-        static int device_read(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
-
     private:
-        // tag for logs
-        const char* tag = "Nimbler";
+        static uint8_t ble_addr_type; // bluetooth address type
+        static uint16_t attr_hndl_audio; // attribute handle for audio characteristic
 
-        // attribute handle for audio characteristic
-        uint16_t attr_hndl_audio;
-
-        // uuids for main service and characteristics
+        /* uuids for main ble service and characteristics */
         uint16_t service_uuid_val = 0xBEEF;
         const ble_uuid16_t service_uuid = {
             .u = BLE_UUID_TYPE_16,
@@ -56,33 +50,42 @@ class Nimbler {
             .value = device_write_val
         };
 
-        // gatt characteristic structure definition
+        /* gatt characteristic structure definition */
         const struct ble_gatt_chr_def gatt_chars[N_CHARACTERISTICS] = {
             {
                 .uuid = (ble_uuid_t *)&device_read_uuid,
-                .access_cb = device_read,
+                .access_cb = _device_read,
                 .flags = BLE_GATT_CHR_F_READ
             },
             {
                 .uuid = (ble_uuid_t *)&device_write_uuid,
-                .access_cb = device_write,
+                .access_cb = _device_write,
                 .flags = BLE_GATT_CHR_F_WRITE | BLE_GATT_CHR_F_NOTIFY,
                 .val_handle = &attr_hndl_audio
             },
             {
-                0, /* No more characteristics*/
+                0, // No more characteristics
             },
         };
-        // gatt service structure definition
+
+        /* gatt service structure definition */
         const struct ble_gatt_svc_def gatt_svcs[N_SERVICES] = {
             {   .type = BLE_GATT_SVC_TYPE_PRIMARY,
                 .uuid = (ble_uuid_t *)&service_uuid,                 // Define UUID for device type
                 .characteristics = gatt_chars,
             },
             {
-                0, /* No more services */
+                0, // No more services
             },
         };
+
+        static void _ble_task(void *param);
+        static void _ble_app_on_sync();
+        static void _ble_app_on_reset(int reason);
+        static void _ble_app_advertise();
+        static int _device_write(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
+        static int _device_read(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
+
 
 };
 
