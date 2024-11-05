@@ -24,14 +24,13 @@
 
 class Nimbler {
     public:
-        static constexpr char* tag = "Nimbler"; // tag used for logs
-
         Nimbler(const char* device_name);
         ~Nimbler();
         
         void init();
 
     private:
+        static constexpr char* tag = "Nimbler"; // tag used for logs
         const char* device_name;
         
         static uint8_t ble_addr_type; // bluetooth address type
