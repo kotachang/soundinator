@@ -4,7 +4,7 @@
 
 /*
 -------------------------------------------------------------------------------------
-Private Member Initialization
+Static Private Member Initialization
 -------------------------------------------------------------------------------------
 */
 
@@ -12,7 +12,7 @@ uint8_t Nimbler::ble_addr_type = 0;
 uint16_t Nimbler::conn_hndl = 0;
 uint16_t Nimbler::attr_hndl_audio = 0;
 
-/* uuids for main ble service and characteristics */
+/* UUIDs for main ble service and characteristics */
 const ble_uuid16_t Nimbler::service_uuid = {
     .u = BLE_UUID_TYPE_16,
     .value = service_uuid_val
@@ -26,7 +26,7 @@ const ble_uuid16_t Nimbler::device_write_uuid = {
     .value = device_write_val
 };
 
-/* gatt characteristic structure definition */
+/* GATT characteristic structure definition */
 const struct ble_gatt_chr_def Nimbler::gatt_chars[N_CHARACTERISTICS] = {
     {
         .uuid = (ble_uuid_t *)&device_read_uuid,
@@ -40,18 +40,18 @@ const struct ble_gatt_chr_def Nimbler::gatt_chars[N_CHARACTERISTICS] = {
         .val_handle = &attr_hndl_audio
     },
     {
-        0, // No more characteristics
+        0, // no more characteristics
     },
 };
 
-/* gatt service structure definition */
+/* GATT service structure definition */
 const struct ble_gatt_svc_def Nimbler::gatt_svcs[N_SERVICES] = {
     {   .type = BLE_GATT_SVC_TYPE_PRIMARY,
         .uuid = (ble_uuid_t *)&service_uuid,                 // Define UUID for device type
         .characteristics = gatt_chars,
     },
     {
-        0, // No more services
+        0, // no more services
     },
 };
 
@@ -64,14 +64,17 @@ Public Functions
 /* Constructor */
 Nimbler::Nimbler(const char* device_name) {
     this->device_name = device_name;
-    ble_addr_type = 0; // Determines the best address type automatically
+    ble_addr_type = 0; // determines the best address type automatically
 }
 
 /* Deconstructor */
 Nimbler::~Nimbler() {
 }
 
-/* Initialize the Nimble stack and call init() functions for GAP, GATT */
+/* Initialize the Nimble stack and call init() functions for GAP, GATT 
+* Follows programming sequence from https://docs.espressif.com/projects/esp-idf/en/v5.3.1/esp32/api-reference/bluetooth/nimble/index.html
+* as well as the bleprph example by espressif
+*/
 void Nimbler::init() {
     /* Initialize the NimBLE protocol stack */
     int ret = nimble_port_init();
@@ -81,8 +84,8 @@ void Nimbler::init() {
     }
 
     /* Initialize the NimBLE host configuration. */
-    ble_hs_cfg.sync_cb = _ble_app_on_sync;   // Initialize advertisement only after the host & controller are synced
-    ble_hs_cfg.reset_cb = _ble_app_on_reset;  // If NimBLE stack resets after crash, print reason
+    ble_hs_cfg.sync_cb = _ble_app_on_sync;   // initialize advertisement only after the host & controller are synced
+    ble_hs_cfg.reset_cb = _ble_app_on_reset;  // if NimBLE stack resets after crash, print reason
     
     /* Initialize GAP, GATT services */
     ble_svc_gap_init();     // General Access Profile
@@ -109,7 +112,7 @@ Private Functions
 void Nimbler::_ble_task(void *param)
 {
     ESP_LOGI(tag, "BLE Host Task Started");
-    nimble_port_run(); // This function will return only when nimble_port_stop() is executed
+    nimble_port_run(); // this function will return only when nimble_port_stop() is executed
     /* After the Nimble port runs, the ble advertisement starts with the _ble_app_on_sync function as a callback */
     nimble_port_freertos_deinit();
 }
@@ -117,8 +120,8 @@ void Nimbler::_ble_task(void *param)
 /* Start of BLE application after NimBLE host & controller are synced */
 void Nimbler::_ble_app_on_sync(void)
 {
-    ble_hs_id_infer_auto(0, &ble_addr_type); // Determines the best address type automatically
-    _ble_app_advertise();                     // Define the BLE connection
+    ble_hs_id_infer_auto(0, &ble_addr_type); // determines the best address type automatically
+    _ble_app_advertise();                     // define the BLE connection
 }
 
 /* Callback after NimBLE stack crashes and resets */
@@ -134,7 +137,7 @@ void Nimbler::_ble_app_advertise(void)
     struct ble_hs_adv_fields fields;
     const char *device_name;
     memset(&fields, 0, sizeof(fields));
-    device_name = ble_svc_gap_device_name(); // Read the BLE device name
+    device_name = ble_svc_gap_device_name(); // read the BLE device name
     fields.name = (uint8_t *)device_name;
     fields.name_len = strlen(device_name);
     fields.name_is_complete = 1;
