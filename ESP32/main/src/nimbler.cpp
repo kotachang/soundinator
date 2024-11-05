@@ -202,8 +202,11 @@ int Nimbler::_receive_audio(uint16_t conn_handle, uint16_t attr_handle, struct b
 int Nimbler::_audio_info(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {   
     uint8_t data[1];
+    /* TODO: check if audio can be played and set data[] accordingly */
     data[0] = 1;
     struct os_mbuf *om = ble_hs_mbuf_from_flat(data, sizeof(data));
-    ble_gatts_notify_custom(con_handle, attr_handle, om);
+    if (notify_chr_audio) {
+        ble_gatts_notify_custom(con_handle, attr_handle, om);
+    }
     return 0;
 }
