@@ -20,7 +20,7 @@
 #define N_CHARACTERISTICS       (3)
 #define service_uuid_val        (0xBEEF)
 #define device_read_uuid_val    (0xBEBE)
-#define device_write_val        (0xFACE)
+#define device_write_uuid_val   (0xFACE)
 
 class Nimbler {
     public:

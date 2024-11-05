@@ -23,7 +23,7 @@ const ble_uuid16_t Nimbler::device_read_uuid = {
 };
 const ble_uuid16_t Nimbler::device_write_uuid = {
     .u = BLE_UUID_TYPE_16,
-    .value = device_write_val
+    .value = device_write_uuid_val
 };
 
 /* GATT characteristic structure definition */
