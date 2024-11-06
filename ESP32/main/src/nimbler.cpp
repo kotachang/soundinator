@@ -199,7 +199,7 @@ int Nimbler::_device_write(uint16_t conn_handle, uint16_t attr_handle, struct bl
 }
 
 /* Read data from ESP32 defined as server */
-int Nimbler::_device_read(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
+int Nimbler::_device_read(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg)
 {
     os_mbuf_append(ctxt->om, "Data from the server", strlen("Data from the server"));
     return 0;

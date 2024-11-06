@@ -50,7 +50,7 @@ class Nimbler {
         static void _ble_app_advertise();
         static int _ble_gap_event(struct ble_gap_event *event, void *arg);
         static int _device_write(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
-        static int _device_read(uint16_t con_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
+        static int _device_read(uint16_t conn_handle, uint16_t attr_handle, struct ble_gatt_access_ctxt *ctxt, void *arg);
 };
 
 #endif /* NIMBLER_HPP */
