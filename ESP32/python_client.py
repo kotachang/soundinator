@@ -23,6 +23,8 @@ import logging
 from bleak import BleakClient, BleakScanner
 from bleak.backends.characteristic import BleakGATTCharacteristic
 
+import soundfile as sf
+
 logger = logging.getLogger(__name__)
 
 
@@ -32,6 +34,11 @@ def notification_handler(characteristic: BleakGATTCharacteristic, data: bytearra
 
 
 async def main(args: argparse.Namespace):
+    data, samplerate = sf.read('StarWars3.wav', dtype='int16')
+    print(data)
+    print(len(data))
+    print(samplerate)
+
     logger.info("starting scan...")
 
     if args.address:
@@ -56,6 +63,7 @@ async def main(args: argparse.Namespace):
 
         await client.start_notify(args.characteristic, notification_handler)
         await asyncio.sleep(5.0)
+        # max data with write = 512 bytes
         await client.write_gatt_char("face", b"\x00", response=False)
         await asyncio.sleep(5.0)
         await client.stop_notify(args.characteristic)
