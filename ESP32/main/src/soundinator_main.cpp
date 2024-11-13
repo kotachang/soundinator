@@ -6,6 +6,7 @@
 #include "nvs_flash.h"
 #include "sdkconfig.h"
 #include "nimbler.hpp"
+#include "player.hpp"
 
 const char* tag = "Main"; // tag for logs
 
@@ -23,6 +24,9 @@ extern "C" void app_main()
     /* Start the BLE task by create a nimbler object and call init() which configures BLE and starts the BLE task
     * Note: FreeRTOS in ESP-IDF should NOT call vTaskStartScheduler() and vTaskEndScheduler()
     */
+    Player player;
+    player.init();
+    ESP_LOGI(tag, "Player initailized");
     Nimbler nimbler("Soundinator");
     nimbler.init();
     ESP_LOGI(tag, "Nimbler initialized");
