@@ -13,6 +13,9 @@ A basic implementation of a BLE speaker to gain a deeper understanding of BLE co
 - Breadboard
 - Wires
 
+## Connection Diagram
+![soundinator_connection_diagram](https://github.com/user-attachments/assets/88a9cd01-bad4-47cc-b313-fb10790bd108)
+
 ## Implementation Steps
 1. Base BLE server as a FreeRTOS task implemented on the ESP32. Able to read and write from an existing BLE scanner app
 2. ESP32 Interface with the amplifier. Structure communication between the BLE task and the audio interface task. Play a note based on user input from the BLE scanner * **we are here** *
