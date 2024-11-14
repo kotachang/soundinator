@@ -10,7 +10,6 @@ A basic implementation of a BLE speaker to gain a deeper understanding of BLE co
 - ESP32 WROOM (comes with BLE and Wifi capabilities)
 - MAX98357A amplifier
 - 4/8 Ohm speaker that meets power requirements of the amplifier
-- Breadboard
 - Wires
 
 ## Connection Diagram
