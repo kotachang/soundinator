@@ -7,8 +7,8 @@ An end-to-end implementation of a BLE speaker to gain a deeper understanding of 
 ![image](https://github.com/user-attachments/assets/b3a942c7-d6fa-4635-9fce-437d58e84522)
 
 ## Contributors
-@kotachang: author
-@dvirhilu: reviewer
+@kotachang: author \
+@dvirhilu: reviewer \
 @jackysioo: reviewer and author for the compatible phone app on https://github.com/jackysioo/soundy
 
 ## Materials
