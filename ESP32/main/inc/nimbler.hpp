@@ -31,7 +31,7 @@ class Nimbler {
 
     private:
         static constexpr char* tag = "Nimbler"; // tag used for logs
-        const char* device_name;
+        const char* m_device_name;
         
         static uint8_t ble_addr_type; // bluetooth address type
         static uint16_t conn_hndl; // bluetooth connection handle
