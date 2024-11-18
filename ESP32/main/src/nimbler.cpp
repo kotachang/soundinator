@@ -8,27 +8,27 @@ Static Private Member Initialization
 -------------------------------------------------------------------------------------
 */
 
-uint8_t Nimbler::ble_addr_type = 0;
-uint16_t Nimbler::conn_hndl = 0;
-uint16_t Nimbler::attr_hndl_audio = 0;
+uint8_t Nimbler::ble_addr_type {0};
+uint16_t Nimbler::conn_hndl {0};
+uint16_t Nimbler::attr_hndl_audio {0};
 uint8_t Nimbler::notify_chr_audio = 0;
 
 /* UUIDs for main ble service and characteristics */
-const ble_uuid16_t Nimbler::service_uuid = {
+const ble_uuid16_t Nimbler::service_uuid {
     .u = BLE_UUID_TYPE_16,
     .value = service_uuid_val
 };
-const ble_uuid16_t Nimbler::audio_info_uuid = {
+const ble_uuid16_t Nimbler::audio_info_uuid {
     .u = BLE_UUID_TYPE_16,
     .value = audio_info_uuid_val
 };
-const ble_uuid16_t Nimbler::receive_audio_uuid = {
+const ble_uuid16_t Nimbler::receive_audio_uuid {
     .u = BLE_UUID_TYPE_16,
     .value = receive_audio_uuid_val
 };
 
 /* GATT characteristic structure definition */
-const struct ble_gatt_chr_def Nimbler::gatt_chars[N_CHARACTERISTICS] = {
+const struct ble_gatt_chr_def Nimbler::gatt_chars[N_CHARACTERISTICS] {
     {
         .uuid = (ble_uuid_t *)&audio_info_uuid,
         .access_cb = _audio_info,
@@ -46,7 +46,7 @@ const struct ble_gatt_chr_def Nimbler::gatt_chars[N_CHARACTERISTICS] = {
 };
 
 /* GATT service structure definition */
-const struct ble_gatt_svc_def Nimbler::gatt_svcs[N_SERVICES] = {
+const struct ble_gatt_svc_def Nimbler::gatt_svcs[N_SERVICES] {
     {   .type = BLE_GATT_SVC_TYPE_PRIMARY,
         .uuid = (ble_uuid_t *)&service_uuid,                 // Define UUID for device type
         .characteristics = gatt_chars,
@@ -63,9 +63,8 @@ Public Functions
 */
 
 /* Constructor */
-Nimbler::Nimbler(const char* device_name) {
-    this->device_name = device_name;
-    ble_addr_type = 0; // determines the best address type automatically
+Nimbler::Nimbler(const char* device_name): m_device_name{device_name} {
+    ble_addr_type = 0; // might get modified by NimBLE later on
 }
 
 /* Deconstructor */
@@ -97,7 +96,7 @@ void Nimbler::init() {
     assert(ret == 0);
 
     /* Name BLE Device */
-    ble_svc_gap_device_name_set(this->device_name);
+    ble_svc_gap_device_name_set(this->m_device_name);
     
     /* Run BLE in a new FreeRTOS task */
     nimble_port_freertos_init(_ble_task);
