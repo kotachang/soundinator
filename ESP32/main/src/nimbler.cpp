@@ -11,7 +11,7 @@ Static Private Member Initialization
 uint8_t Nimbler::ble_addr_type {0};
 uint16_t Nimbler::conn_hndl {0};
 uint16_t Nimbler::attr_hndl_audio {0};
-uint8_t Nimbler::notify_chr_audio = 0;
+uint8_t Nimbler::notify_chr_audio {0};
 
 /* UUIDs for main ble service and characteristics */
 const ble_uuid16_t Nimbler::service_uuid {

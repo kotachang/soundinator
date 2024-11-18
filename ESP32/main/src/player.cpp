@@ -8,12 +8,12 @@ Private Member Initialization
 */
 
 /* FreeRTOS QueueHandle_t for I2S player */
-QueueHandle_t Player::i2s_queue = 0;
+QueueHandle_t Player::i2s_queue {0};
 /* FreeRTOS TaskHandle_t for the main player task */
-TaskHandle_t Player::player_task_handle = 0;
+TaskHandle_t Player::player_task_handle {0};
 
 /* I2S driver configuration */
-const i2s_driver_config_t Player::i2s_config = {
+const i2s_driver_config_t Player::i2s_config {
     .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
     .sample_rate = SAMP_RATE, // TODO: set this based on BLE input. might have to use i2s_set_sample_rates(i2s_port, rate)
     .bits_per_sample = (i2s_bits_per_sample_t)AUDIO_BIT_LEN,
@@ -26,7 +26,7 @@ const i2s_driver_config_t Player::i2s_config = {
 };
 
 /* array that holds the audio to be played */
-int16_t Player::audio[AUDIO_ARR_SZ] = {0};
+int16_t Player::audio[AUDIO_ARR_SZ] {0};
 
 /*
 -------------------------------------------------------------------------------------
@@ -72,9 +72,9 @@ Private Functions
 
 /* Main player task */
 void Player::_player_task(void *param) {
-    size_t bytes_written = 0;
+    size_t bytes_written {0};
     i2s_event_t event;
-    int16_t bytes_left = 0;
+    int16_t bytes_left {0};
     
     while (true) {
         if (xQueueReceive(i2s_queue, &event, portMAX_DELAY) == pdPASS) {

@@ -36,12 +36,12 @@ public:
     int play();
 
 private:
-    i2s_port_t i2s_port = I2S_NUM_0;
+    i2s_port_t i2s_port {I2S_NUM_0};
     static const i2s_driver_config_t i2s_config;
     static QueueHandle_t i2s_queue;
 
     /* I2S pins */
-    i2s_pin_config_t i2s_pins = {
+    i2s_pin_config_t i2s_pins {
         .bck_io_num = GPIO_NUM_27,      // BCLK on MAX98357A
         .ws_io_num = GPIO_NUM_14,       // LRS on MAX98357A
         .data_out_num = GPIO_NUM_26,    // DIN on MAX98357A
