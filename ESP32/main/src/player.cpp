@@ -14,9 +14,9 @@ TaskHandle_t Player::player_task_handle {0};
 
 /* I2S driver configuration */
 const i2s_driver_config_t Player::i2s_config {
-    .mode = (i2s_mode_t)(I2S_MODE_MASTER | I2S_MODE_TX),
+    .mode = static_cast<i2s_mode_t>(I2S_MODE_MASTER | I2S_MODE_TX),
     .sample_rate = SAMP_RATE, // TODO: set this based on BLE input. might have to use i2s_set_sample_rates(i2s_port, rate)
-    .bits_per_sample = (i2s_bits_per_sample_t)AUDIO_BIT_LEN,
+    .bits_per_sample = static_cast<i2s_bits_per_sample_t>(AUDIO_BIT_LEN),
     .channel_format = I2S_CHANNEL_FMT_RIGHT_LEFT,
     .communication_format = I2S_COMM_FORMAT_STAND_I2S,
     .intr_alloc_flags = 0, // default interrupt priority
