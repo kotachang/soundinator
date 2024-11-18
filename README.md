@@ -2,22 +2,20 @@
 
 BEHOLD.... THE SOUNDINATOR
 
-A basic implementation of a BLE speaker to gain a deeper understanding of BLE concepts
+An end-to-end implementation of a BLE speaker to gain a deeper understanding of BLE and RTOS concepts
 
 ![image](https://github.com/user-attachments/assets/b3a942c7-d6fa-4635-9fce-437d58e84522)
+
+## Contributors
+@kotachang: author
+@dvirhilu: reviewer
+@jackysioo: reviewer and author for the compatible phone app on https://github.com/jackysioo/soundy
 
 ## Materials
 - ESP32 WROOM (comes with BLE and Wifi capabilities)
 - MAX98357A amplifier
 - 4/8 Ohm speaker that meets power requirements of the amplifier
-- Breadboard
 - Wires
-
-## Implementation Steps
-1. Base BLE server as a FreeRTOS task implemented on the ESP32. Able to read and write from an existing BLE scanner app
-2. ESP32 Interface with the amplifier. Structure communication between the BLE task and the audio interface task. Play a note based on user input from the BLE scanner * **we are here** *
-3. Send chunks of raw audio (.wav) from the phone and play from the ESP32 speaker
-4. Implement a custom BLE client app on the phone to send any audio recording to the ESP32
 
 ## Build and Flash Instructions for ESP32
 Following are the instructions for when you FIRST build the project. After building once, only steps 8-10 are required. Note that the very first build process can take a while. 
